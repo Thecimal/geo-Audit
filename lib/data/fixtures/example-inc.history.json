@@ -1,0 +1,178 @@
+[
+  {
+    "id": "snap-run-may",
+    "crawlRunId": "run-may",
+    "createdAt": "2026-05-22T09:00:00.000Z",
+    "overallScore": 44,
+    "kpiScores": [
+      {
+        "key": "entity-clarity",
+        "score": 59
+      },
+      {
+        "key": "answer-readiness",
+        "score": 29
+      },
+      {
+        "key": "ai-discoverability",
+        "score": 47
+      },
+      {
+        "key": "content-authority",
+        "score": 30
+      },
+      {
+        "key": "structured-data",
+        "score": 37
+      },
+      {
+        "key": "knowledge-coverage",
+        "score": 50
+      },
+      {
+        "key": "technical-accessibility",
+        "score": 58
+      },
+      {
+        "key": "brand-consistency",
+        "score": 56
+      },
+      {
+        "key": "citation-potential",
+        "score": 33
+      }
+    ]
+  },
+  {
+    "id": "snap-run-jun",
+    "crawlRunId": "run-jun",
+    "createdAt": "2026-06-19T09:00:00.000Z",
+    "overallScore": 53,
+    "kpiScores": [
+      {
+        "key": "entity-clarity",
+        "score": 70
+      },
+      {
+        "key": "answer-readiness",
+        "score": 34
+      },
+      {
+        "key": "ai-discoverability",
+        "score": 56
+      },
+      {
+        "key": "content-authority",
+        "score": 36
+      },
+      {
+        "key": "structured-data",
+        "score": 44
+      },
+      {
+        "key": "knowledge-coverage",
+        "score": 59
+      },
+      {
+        "key": "technical-accessibility",
+        "score": 69
+      },
+      {
+        "key": "brand-consistency",
+        "score": 67
+      },
+      {
+        "key": "citation-potential",
+        "score": 40
+      }
+    ]
+  },
+  {
+    "id": "snap-run-jul",
+    "crawlRunId": "run-jul",
+    "createdAt": "2026-07-17T09:00:00.000Z",
+    "overallScore": 61,
+    "kpiScores": [
+      {
+        "key": "entity-clarity",
+        "score": 81
+      },
+      {
+        "key": "answer-readiness",
+        "score": 39
+      },
+      {
+        "key": "ai-discoverability",
+        "score": 65
+      },
+      {
+        "key": "content-authority",
+        "score": 41
+      },
+      {
+        "key": "structured-data",
+        "score": 51
+      },
+      {
+        "key": "knowledge-coverage",
+        "score": 68
+      },
+      {
+        "key": "technical-accessibility",
+        "score": 79
+      },
+      {
+        "key": "brand-consistency",
+        "score": 77
+      },
+      {
+        "key": "citation-potential",
+        "score": 46
+      }
+    ]
+  },
+  {
+    "id": "snap-run-aug",
+    "crawlRunId": "run-aug",
+    "createdAt": "2026-08-06T09:00:00.000Z",
+    "overallScore": 66,
+    "kpiScores": [
+      {
+        "key": "entity-clarity",
+        "score": 88
+      },
+      {
+        "key": "answer-readiness",
+        "score": 43
+      },
+      {
+        "key": "ai-discoverability",
+        "score": 71
+      },
+      {
+        "key": "content-authority",
+        "score": 45
+      },
+      {
+        "key": "structured-data",
+        "score": 56
+      },
+      {
+        "key": "knowledge-coverage",
+        "score": 74
+      },
+      {
+        "key": "technical-accessibility",
+        "score": 86
+      },
+      {
+        "key": "brand-consistency",
+        "score": 85
+      },
+      {
+        "key": "citation-potential",
+        "score": 50
+      }
+    ]
+  }
+]

@@ -1,0 +1,74 @@
+{
+  "companyName": {
+    "value": "Example Inc.",
+    "confidence": 0.98,
+    "source": "https://www.exampleinc.com/ (title tag, Organization schema)",
+    "status": "confirmed"
+  },
+  "tagline": {
+    "value": "Scheduling software that keeps your trucks moving.",
+    "confidence": 0.9,
+    "source": "https://www.exampleinc.com/ (H1)",
+    "status": "confirmed"
+  },
+  "description": {
+    "value": "Example Inc. builds dispatch and scheduling software for HVAC, plumbing, and electrical companies who need to keep technicians on the road without spreadsheet chaos.",
+    "confidence": 0.92,
+    "source": "https://www.exampleinc.com/ (meta description)",
+    "status": "confirmed"
+  },
+  "industry": {
+    "value": "Field Service Management Software",
+    "confidence": 0.85,
+    "source": "inferred from services + homepage copy",
+    "status": "confirmed"
+  },
+  "foundedYear": {
+    "value": 2017,
+    "confidence": 0.8,
+    "source": "https://www.exampleinc.com/about",
+    "status": "confirmed"
+  },
+  "headquarters": {
+    "value": "Denver, CO",
+    "confidence": 0.75,
+    "source": "https://www.exampleinc.com/contact",
+    "status": "confirmed"
+  },
+  "services": {
+    "value": ["Dispatch Scheduling", "Technician Mobile App", "Customer Notifications", "Invoicing & Payments"],
+    "confidence": 0.9,
+    "source": "https://www.exampleinc.com/services",
+    "status": "confirmed"
+  },
+  "targetAudience": {
+    "value": "HVAC, plumbing, and electrical companies with 5-50 technicians",
+    "confidence": 0.7,
+    "source": "inferred from homepage + services copy",
+    "status": "inferred"
+  },
+  "valueProposition": {
+    "value": "Cuts dispatcher call time in half by auto-matching the closest available technician to each job.",
+    "confidence": 0.65,
+    "source": "https://www.exampleinc.com/ (hero subhead)",
+    "status": "confirmed"
+  },
+  "phone": {
+    "value": "+1-303-555-0142",
+    "confidence": 0.95,
+    "source": "https://www.exampleinc.com/contact",
+    "status": "confirmed"
+  },
+  "email": {
+    "value": "hello@exampleinc.com",
+    "confidence": 0.95,
+    "source": "https://www.exampleinc.com/contact",
+    "status": "confirmed"
+  },
+  "socialProfiles": {
+    "value": ["https://twitter.com/exampleinc", "https://linkedin.com/company/exampleinc"],
+    "confidence": 0.8,
+    "source": "https://www.exampleinc.com/ (footer links)",
+    "status": "confirmed"
+  }
+}

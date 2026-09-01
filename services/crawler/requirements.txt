@@ -1,0 +1,5 @@
+# Standard library only for fetch.py / robots.py / extract.py / pipeline.py —
+# zero third-party runtime dependencies by design (see architecture.md).
+#
+# Dev/test only:
+pytest>=8.0

@@ -1,0 +1,26 @@
+{
+  "totalPages": 9,
+  "brokenLinks": [
+    { "from": "https://www.exampleinc.com/services", "to": "https://www.exampleinc.com/integrations", "status": 404 }
+  ],
+  "orphanPages": ["https://www.exampleinc.com/legacy-pricing-2022"],
+  "duplicateTitles": [
+    ["https://www.exampleinc.com/blog/dispatch-tips", "https://www.exampleinc.com/blog/tech-scheduling-mistakes"]
+  ],
+  "duplicateDescriptions": [],
+  "robotsTxtFound": true,
+  "sitemapFound": true,
+  "sitemapUrls": [
+    "https://www.exampleinc.com/",
+    "https://www.exampleinc.com/about",
+    "https://www.exampleinc.com/services",
+    "https://www.exampleinc.com/pricing",
+    "https://www.exampleinc.com/contact",
+    "https://www.exampleinc.com/blog",
+    "https://www.exampleinc.com/blog/dispatch-tips",
+    "https://www.exampleinc.com/blog/tech-scheduling-mistakes"
+  ],
+  "llmsTxtFound": false,
+  "httpsUsed": true,
+  "avgLoadTimeMs": 640
+}

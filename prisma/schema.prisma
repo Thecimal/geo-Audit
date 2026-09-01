@@ -1,0 +1,345 @@
+// GEO Health — database schema.
+//
+// Not wired to a live Postgres instance in this build (see README,
+// "What's real vs. simulated") — lib/data/getProject.ts reads fixtures
+// instead. This file is complete and migration-ready
+// (`npx prisma migrate dev`) so the swap is schema-first.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy / auth — not wired into any route in this build (single-tenant
+// demo, see assumptions #3). Present so multi-tenant auth is a schema
+// migration, not a redesign.
+// ---------------------------------------------------------------------------
+
+model User {
+  id        String          @id @default(cuid())
+  email     String          @unique
+  name      String?
+  createdAt DateTime        @default(now())
+  memberships ProjectMember[]
+  auditLogs AuditLog[]
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  role      String   @default("member") // owner | member | viewer
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  projectId String?
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// ---------------------------------------------------------------------------
+// Core project
+// ---------------------------------------------------------------------------
+
+model Project {
+  id          String   @id @default(cuid())
+  url         String
+  displayName String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members         ProjectMember[]
+  crawlRuns       CrawlRun[]
+  businessProfile BusinessProfile?
+  entities        Entity[]
+  relationships   EntityRelationship[]
+  auditSnapshots  AuditSnapshot[]
+  issues          Issue[]
+  questions       Question[]
+}
+
+// ---------------------------------------------------------------------------
+// Crawler
+// ---------------------------------------------------------------------------
+
+enum CrawlStatus {
+  QUEUED
+  RUNNING
+  COMPLETE
+  FAILED
+}
+
+model CrawlRun {
+  id          String      @id @default(cuid())
+  projectId   String
+  status      CrawlStatus @default(QUEUED)
+  startedAt   DateTime    @default(now())
+  finishedAt  DateTime?
+  maxPages    Int         @default(50)
+  maxDepth    Int         @default(3)
+  pagesFound  Int         @default(0)
+  errorMessage String?
+
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  pages          CrawledPage[]
+  technicalFinding TechnicalFinding?
+  auditSnapshots AuditSnapshot[]
+  implementations Implementation[]
+}
+
+model CrawledPage {
+  id          String   @id @default(cuid())
+  crawlRunId  String
+  url         String
+  depth       Int
+  statusCode  Int
+  title       String?
+  metaDescription String?
+  wordCount   Int      @default(0)
+  headings    Json     // { h1: string[], h2: string[], h3: string[] }
+  internalLinks Json   // string[]
+  externalLinks Json   // string[]
+  images      Json     // { src: string, alt: string | null }[]
+  jsonLd      Json     // any[]
+  openGraph   Json     // Record<string, string>
+  canonical   String?
+  hasViewportMeta Boolean @default(false)
+  fetchedAt   DateTime @default(now())
+
+  crawlRun CrawlRun @relation(fields: [crawlRunId], references: [id], onDelete: Cascade)
+
+  @@index([crawlRunId])
+}
+
+// One row per crawl run — technical findings are derived from the page set
+// but expensive enough (broken-link graph, duplicate detection) to cache.
+model TechnicalFinding {
+  id                  String   @id @default(cuid())
+  crawlRunId          String   @unique
+  totalPages          Int
+  brokenLinks         Json     // { from: string, to: string, status: number }[]
+  orphanPages         Json     // string[]
+  duplicateTitles     Json     // string[][]
+  duplicateDescriptions Json   // string[][]
+  robotsTxtFound      Boolean
+  sitemapFound        Boolean
+  sitemapUrls         Json     // string[]
+  llmsTxtFound        Boolean  @default(false)
+  httpsUsed           Boolean
+  avgLoadTimeMs       Int?
+
+  crawlRun CrawlRun @relation(fields: [crawlRunId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Knowledge graph / website model
+//
+// FieldValue<T> is stored as JSON on BusinessProfile rather than as columns
+// or a join table: every discovered fact needs the same four-part shape
+// (value, confidence, source, status), and a table-per-field would multiply
+// table count for no query benefit at this stage. Entity/EntityRelationship
+// are true rows because /knowledge needs to query and render a graph.
+// ---------------------------------------------------------------------------
+
+model BusinessProfile {
+  id        String   @id @default(cuid())
+  projectId String   @unique
+  updatedAt DateTime @updatedAt
+
+  // Each of these is a FieldValue<T> — see lib/scoring/types.ts.
+  companyName      Json
+  tagline          Json
+  description      Json
+  industry         Json
+  foundedYear      Json
+  headquarters     Json
+  services         Json // FieldValue<string[]>
+  targetAudience   Json
+  valueProposition Json
+  phone            Json
+  email            Json
+  socialProfiles   Json // FieldValue<string[]>
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+enum EntityType {
+  ORGANIZATION
+  PERSON
+  PRODUCT
+  SERVICE
+  LOCATION
+  TOPIC
+}
+
+model Entity {
+  id          String     @id @default(cuid())
+  projectId   String
+  name        String
+  type        EntityType
+  description String?
+  confidence  Float      @default(0.5)
+  sourceUrl   String?
+
+  project      Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  outgoing     EntityRelationship[] @relation("FromEntity")
+  incoming     EntityRelationship[] @relation("ToEntity")
+
+  @@index([projectId])
+}
+
+model EntityRelationship {
+  id           String @id @default(cuid())
+  projectId    String
+  fromEntityId String
+  toEntityId   String
+  relationType String // e.g. "offers", "located_in", "employs", "part_of"
+
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fromEntity Entity  @relation("FromEntity", fields: [fromEntityId], references: [id], onDelete: Cascade)
+  toEntity   Entity  @relation("ToEntity", fields: [toEntityId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ---------------------------------------------------------------------------
+// Scoring history
+//
+// AuditSnapshot rows are immutable — a new one is inserted per audit run,
+// never updated in place, so /history can show real before/after diffs
+// and nothing silently loses data.
+// ---------------------------------------------------------------------------
+
+model AuditSnapshot {
+  id          String   @id @default(cuid())
+  projectId   String
+  crawlRunId  String
+  createdAt   DateTime @default(now())
+
+  overallScore Float
+  kpiScores    Json    // KpiScore[] — see lib/scoring/types.ts, fully recomputable
+
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  crawlRun CrawlRun @relation(fields: [crawlRunId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Issues, recommendations, solutions, implementation tracking
+//
+// Issue and Recommendation are separate models joined 1:1: an Issue is a
+// finding (detected, evidence-backed, always present once scored), while a
+// Recommendation is generated content (may not exist yet, may be
+// regenerated, has its own SolutionKind).
+// ---------------------------------------------------------------------------
+
+enum IssueSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum ImplementationStatus {
+  DETECTED
+  REVIEWED
+  IN_PROGRESS
+  IMPLEMENTED
+  VERIFIED
+}
+
+model Issue {
+  id          String        @id @default(cuid())
+  projectId   String
+  kpiKey      String        // e.g. "structured-data"
+  componentKey String       // e.g. "organization-schema"
+  title       String
+  description String
+  severity    IssueSeverity
+  impact      Int           // 1-5, used by the Impact×Effort matrix
+  effort      Int           // 1-5
+  evidence    Json          // string[]
+  detectedAt  DateTime      @default(now())
+
+  status         ImplementationStatus @default(DETECTED)
+
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  recommendation Recommendation?
+  implementation Implementation?
+
+  @@index([projectId, status])
+}
+
+enum SolutionKind {
+  JSON_LD
+  COPY
+  FAQ
+  OUTLINE
+  TECHNICAL_FIX
+}
+
+model Recommendation {
+  id          String       @id @default(cuid())
+  issueId     String       @unique
+  kind        SolutionKind
+  title       String
+  body        String       // generated content: JSON-LD string, copy, outline markdown, etc.
+  regenerated Int          @default(0) // count of regenerations, shown in the panel UI
+  generatedAt DateTime     @default(now())
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+}
+
+// Implementation is its own table, not a status enum column alone, because
+// "verified" needs to reference the specific CrawlRun that verified it —
+// that traceability (Detected → Reviewed → In Progress → Implemented →
+// Verified) is a spec requirement.
+model Implementation {
+  id               String   @id @default(cuid())
+  issueId          String   @unique
+  reviewedAt       DateTime?
+  inProgressAt     DateTime?
+  implementedAt    DateTime?
+  verifiedAt       DateTime?
+  verifiedByCrawlRunId String?
+  notes            String?
+
+  issue           Issue     @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  verifiedByCrawlRun CrawlRun? @relation(fields: [verifiedByCrawlRunId], references: [id], onDelete: SetNull)
+}
+
+// ---------------------------------------------------------------------------
+// AI search question simulation
+// ---------------------------------------------------------------------------
+
+model Question {
+  id           String   @id @default(cuid())
+  projectId    String
+  text         String
+  isCustom     Boolean  @default(false)
+  coverageScore Float   // 0-1, from lib/questions heuristic
+  answeredBy   Json     // string[] of page URLs that appear to answer it
+  gapSummary   String?
+  createdAt    DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}

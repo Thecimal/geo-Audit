@@ -1,0 +1,19 @@
+{
+  "entities": [
+    { "id": "org-1", "name": "Example Inc.", "type": "ORGANIZATION", "description": "Field service scheduling software company.", "confidence": 0.98, "sourceUrl": "https://www.exampleinc.com/" },
+    { "id": "svc-1", "name": "Dispatch Scheduling", "type": "SERVICE", "description": "Auto-matches the closest available technician to each job.", "confidence": 0.9, "sourceUrl": "https://www.exampleinc.com/services" },
+    { "id": "svc-2", "name": "Technician Mobile App", "type": "SERVICE", "description": "Mobile app for field technicians to view jobs and update status.", "confidence": 0.85, "sourceUrl": "https://www.exampleinc.com/services" },
+    { "id": "svc-3", "name": "Customer Notifications", "type": "SERVICE", "description": "Automated SMS/email updates for customers awaiting a technician.", "confidence": 0.8, "sourceUrl": "https://www.exampleinc.com/services" },
+    { "id": "svc-4", "name": "Invoicing & Payments", "type": "SERVICE", "description": "In-app invoicing and card payments after job completion.", "confidence": 0.8, "sourceUrl": "https://www.exampleinc.com/services" },
+    { "id": "person-1", "name": "Maria Chen", "type": "PERSON", "description": "Co-founder and CEO.", "confidence": 0.75, "sourceUrl": "https://www.exampleinc.com/about" },
+    { "id": "loc-1", "name": "Denver, CO", "type": "LOCATION", "description": "Headquarters.", "confidence": 0.7, "sourceUrl": "https://www.exampleinc.com/contact" }
+  ],
+  "relationships": [
+    { "id": "rel-1", "fromEntityId": "org-1", "toEntityId": "svc-1", "relationType": "offers" },
+    { "id": "rel-2", "fromEntityId": "org-1", "toEntityId": "svc-2", "relationType": "offers" },
+    { "id": "rel-3", "fromEntityId": "org-1", "toEntityId": "svc-3", "relationType": "offers" },
+    { "id": "rel-4", "fromEntityId": "org-1", "toEntityId": "svc-4", "relationType": "offers" },
+    { "id": "rel-5", "fromEntityId": "person-1", "toEntityId": "org-1", "relationType": "works_at" },
+    { "id": "rel-6", "fromEntityId": "org-1", "toEntityId": "loc-1", "relationType": "located_in" }
+  ]
+}

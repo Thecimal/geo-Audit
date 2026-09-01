@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background-color: #0f1417;
+  color: #e8edef;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+.font-data {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Faint instrument-panel grid, used behind gauges and hero sections. */
+.bg-instrument-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgba(232, 237, 239, 0.07) 1px, transparent 0);
+  background-size: 18px 18px;
+}
+
+::selection {
+  background: rgba(94, 234, 212, 0.25);
+  color: #e8edef;
+}
+
+/* Visible keyboard focus, everywhere. */
+:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@keyframes needle-settle {
+  from {
+    transform: rotate(-90deg);
+  }
+}
+
+.animate-needle {
+  animation: needle-settle 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #2c363d;
+  border-radius: 4px;
+}
