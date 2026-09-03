@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { ConfidenceMeter } from "./ui/ConfidenceMeter";
 import { Badge } from "./ui/Badge";
-import { scoreQuestionCoverage, type QuestionCoverage } from "@/lib/questions";
-import type { CrawledPage } from "@/lib/scoring/types";
+import type { QuestionCoverage } from "@/lib/questions";
 
 function coverageTone(score: number) {
   if (score >= 0.6) return "cyan" as const;
@@ -13,16 +12,35 @@ function coverageTone(score: number) {
   return "coral" as const;
 }
 
-export function QuestionsBoard({ initial, pages }: { initial: QuestionCoverage[]; pages: CrawledPage[] }) {
+export function QuestionsBoard({ initial, projectId }: { initial: QuestionCoverage[]; projectId: string }) {
   const [questions, setQuestions] = useState(initial);
   const [draft, setDraft] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const addQuestion = () => {
+  const addQuestion = async () => {
     const text = draft.trim();
-    if (!text) return;
-    const coverage = scoreQuestionCoverage(text, pages);
-    setQuestions((qs) => [...qs, coverage]);
-    setDraft("");
+    if (!text || submitting) return;
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      // Scoring happens server-side (POST /api/projects/:id/questions) so
+      // the embedding API key never has to reach the browser.
+      const res = await fetch(`/api/projects/${projectId}/questions`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      const { question } = (await res.json()) as { question: QuestionCoverage };
+      setQuestions((qs) => [...qs, question]);
+      setDraft("");
+    } catch {
+      setError("Couldn't score that question — try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -37,11 +55,13 @@ export function QuestionsBoard({ initial, pages }: { initial: QuestionCoverage[]
         />
         <button
           onClick={addQuestion}
-          className="flex items-center gap-1.5 rounded-md border border-signal-cyan/40 bg-signal-cyan/10 px-3 py-2 text-sm text-signal-cyan"
+          disabled={submitting}
+          className="flex items-center gap-1.5 rounded-md border border-signal-cyan/40 bg-signal-cyan/10 px-3 py-2 text-sm text-signal-cyan disabled:opacity-50"
         >
-          <Plus size={14} /> Add
+          {submitting ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Add
         </button>
       </div>
+      {error && <p className="text-xs text-signal-coral">{error}</p>}
 
       <div className="space-y-2">
         {questions.map((q, i) => (

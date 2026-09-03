@@ -7,18 +7,19 @@ export default async function QuestionsPage() {
   const { businessProfile, pages } = project.data;
 
   const questionTexts = defaultQuestionSet(businessProfile.companyName.value || "this business", businessProfile.industry.value || "field service");
-  const initial = questionTexts.map((q) => scoreQuestionCoverage(q, pages));
+  const initial = await Promise.all(questionTexts.map((q) => scoreQuestionCoverage(q, pages)));
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-semibold text-text-high">AI search questions</h1>
         <p className="mt-1 text-sm text-text-mid">
-          Coverage is a keyword-overlap heuristic against crawled content — a rough proxy for whether an AI assistant could answer each
-          question from this site alone.
+          Coverage uses semantic (embedding) matching against crawled content when configured, falling back to keyword overlap otherwise — a
+          proxy for whether an AI assistant could answer each question from this site alone.
         </p>
       </div>
-      <QuestionsBoard initial={initial} pages={pages} />
+
+      <QuestionsBoard initial={initial} projectId={project.id} />
     </div>
   );
 }
