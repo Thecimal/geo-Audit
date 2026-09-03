@@ -66,5 +66,5 @@ export async function getIssueSolution(issueId: string): Promise<{ issue: Derive
   const project = await getProject();
   const issue = project.issues.find((i) => i.id === issueId);
   if (!issue) return null;
-  return { issue, solution: generateSolution(issue, project.data) };
+  return { issue, solution: await generateSolution(issue, project.data) };
 }

@@ -6,7 +6,10 @@ import { ActionsBoard } from "@/components/ActionsBoard";
 
 export default async function ActionsPage({ searchParams }: { searchParams: { issue?: string } }) {
   const project = await getProject();
-  const solutions = Object.fromEntries(project.issues.map((issue) => [issue.id, generateSolution(issue, project.data)]));
+  const solutionEntries = await Promise.all(
+    project.issues.map(async (issue) => [issue.id, await generateSolution(issue, project.data)] as const)
+  );
+  const solutions = Object.fromEntries(solutionEntries);
 
   return (
     <div className="space-y-6">
