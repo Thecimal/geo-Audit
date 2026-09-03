@@ -15,7 +15,7 @@ Knowledge Graph / Website Model (Prisma: BusinessProfile, Entity, EntityRelation
     ↓
 Rule-Based GEO Analyzer (lib/scoring — deterministic)
     ↓
-AI Semantic Analyzer (LLM call — seam documented below, not wired to a live key here)
+AI Semantic Analyzer (LLM call — see section 8; lib/solutions/generate.ts is wired to a live call, gated on ANTHROPIC_API_KEY)
     ↓
 Scoring Engine (lib/scoring)
     ↓
@@ -173,17 +173,22 @@ lib/
 
 ## 8. AI Semantic Analyzer — the LLM seam
 
-This build's "AI" layer (`lib/solutions/generate.ts`, the plain-language
-summary on `/overview`) is template-based and deterministic, grounded in
-the same crawl data the scoring engine uses, because this environment has
-no live model key wired into the Next.js server. The intended seam for a
-real LLM call is exactly `generateSolution(issue, project)`: replace its
-body with a server-side call to the Anthropic API
-(`ANTHROPIC_API_KEY`, never exposed to the browser) using a prompt built
+`generateSolution(issue, project)` in `lib/solutions/generate.ts` calls the
+live Anthropic API (`ANTHROPIC_API_KEY`, read server-side only, never
+exposed to the browser) to draft each fix's body, using a prompt built
 from `issue.evidence`, the relevant `KnowledgeProfile` fields, and the
-source page content — i.e. the same inputs the deterministic version
-already uses. Everything downstream (Copy/Download/Regenerate buttons,
-the panel UI) is unchanged.
+source page content. If the key isn't set, the call fails, or it times
+out, it falls back to the original deterministic template
+(`generateTemplateSolution`) so this never throws or returns empty
+content. Everything downstream (Copy/Download/Regenerate buttons, the
+panel UI) is unchanged either way.
+
+`generateOverviewSummary()` in `lib/solutions/summary.ts` (the
+plain-language line on `/overview`) is deliberately **not** wired to a
+live call, unlike the above — it's a one-sentence readout entirely
+derived from already-computed KPI scores, so making it non-deterministic
+would only add latency and cost for no benefit. It stays template-based
+by design, not because a seam is missing.
 
 ## 9. Assumptions made for this build
 
@@ -198,7 +203,11 @@ the panel UI) is unchanged.
    queries it yet — see #1.
 3. **No auth.** Single-tenant demo. `User`/`ProjectMember`/`AuditLog`
    exist in the schema for when this is needed; not wired into routes.
-4. **No live LLM calls.** See section 8.
+4. **Live LLM calls are conditional, not absent.** `generateSolution()`
+   calls the Anthropic API when `ANTHROPIC_API_KEY` is set in the
+   deployment environment; this repo ships with no key configured, so a
+   fresh checkout still runs template-only until one is added. See
+   section 8.
 5. **shadcn/ui was not installed via its CLI** (would need network access
    to fetch component source); instead the design system is a small set
    of hand-rolled primitives in `components/ui/` using the same Tailwind

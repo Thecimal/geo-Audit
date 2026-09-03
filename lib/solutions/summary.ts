@@ -1,9 +1,12 @@
 import type { GeoScoreResult } from "../scoring/types";
 
 /**
- * Template-based, deterministic — same LLM seam as generateSolution() in
- * ./generate.ts. Grounded entirely in the computed KPI scores, no free
- * generation, so it never says anything the scoring engine can't back up.
+ * Template-based and deterministic by design, unlike generateSolution()
+ * in ./generate.ts (which now calls a live LLM when ANTHROPIC_API_KEY is
+ * set — see architecture.md section 8). This is a one-sentence readout
+ * entirely derived from already-computed KPI scores, so it never says
+ * anything the scoring engine can't back up, and there's no benefit to
+ * making it non-deterministic.
  */
 export function generateOverviewSummary(displayName: string, result: GeoScoreResult): string {
   const sorted = [...result.kpiScores].sort((a, b) => b.score - a.score);
